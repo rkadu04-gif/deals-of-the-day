@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // Validation Helpers
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['email']) && data.keys().size() == 1
+        && data.email is string && data.email.size() <= 200;
+    }
+    
+    function isValidDeal(data) {
+      return data.keys().hasAll(['title', 'slug', 'store', 'originalPrice', 'discountedPrice', 'affiliateLink', 'imageUrl', 'categoryId', 'authorId', 'createdAt', 'updatedAt'])
+        && data.title is string && data.title.size() <= 200
+        && data.slug is string && data.slug.size() <= 200
+        && data.store is string && data.store.size() <= 50
+        && data.originalPrice is number
+        && data.discountedPrice is number
+        && data.affiliateLink is string && data.affiliateLink.size() <= 1000
+        && data.imageUrl is string && data.imageUrl.size() <= 1000
+        && data.categoryId is string && data.categoryId.size() <= 128
+        && data.authorId == request.auth.uid
+        && data.createdAt is number
+        && data.updatedAt is number
+        && (!('isActive' in data) || data.isActive is bool)
+        && (!('isTrending' in data) || data.isTrending is bool)
+        && (!('discountPercentage' in data) || data.discountPercentage is number)
+        && (!('description' in data) || (data.description is string && data.description.size() <= 5000));
+    }
+    
+    function isValidCategory(data) {
+      return data.keys().hasAll(['name', 'slug'])
+        && data.name is string && data.name.size() <= 100
+        && data.slug is string && data.slug.size() <= 100
+        && (!('icon' in data) || (data.icon is string && data.icon.size() <= 100));
+    }
+    
+    function isValidCoupon(data) {
+      return data.keys().hasAll(['store', 'code', 'description', 'authorId', 'createdAt'])
+        && data.store is string && data.store.size() <= 100
+        && data.code is string && data.code.size() <= 100
+        && data.description is string && data.description.size() <= 500
+        && data.authorId == request.auth.uid
+        && data.createdAt is number
+        && (!('isActive' in data) || data.isActive is bool)
+        && (!('expiryDate' in data) || data.expiryDate is number);
+    }
+    
+    function isValidBlog(data) {
+       return data.keys().hasAll(['title', 'slug', 'content', 'authorId', 'createdAt', 'updatedAt'])
+        && data.title is string && data.title.size() <= 200
+        && data.slug is string && data.slug.size() <= 200
+        && data.content is string && data.content.size() <= 50000
+        && data.authorId == request.auth.uid
+        && data.createdAt is number
+        && data.updatedAt is number
+        && (!('excerpt' in data) || (data.excerpt is string && data.excerpt.size() <= 1000))
+        && (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 1000));
+    }
+
+    // Admins Collection
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && request.auth.uid == adminId;
+      allow list: if isAdmin();
+      // Only existing admins can add new admins (which is safe), or perhaps we don't allow writing via client.
+      allow create, update, delete: if false; 
+    }
+    
+    // Deals Collection
+    match /deals/{dealId} {
+      allow get: if isValidId(dealId);
+      allow list: if true; // We can let clients filter by isActive == true on their end, reads are public
+      allow create: if isAdmin() && isValidId(dealId) && isValidDeal(incoming());
+      allow update: if isAdmin() && isValidId(dealId) && isValidDeal(incoming()); // Admins can change everything
+      allow delete: if isAdmin() && isValidId(dealId);
+    }
+    
+    // Categories Collection
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(categoryId) && isValidCategory(incoming());
+      allow update: if isAdmin() && isValidId(categoryId) && isValidCategory(incoming());
+      allow delete: if isAdmin() && isValidId(categoryId);
+    }
+    
+    // Coupons Collection
+    match /coupons/{couponId} {
+      allow get: if isValidId(couponId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(couponId) && isValidCoupon(incoming());
+      allow update: if isAdmin() && isValidId(couponId) && isValidCoupon(incoming());
+      allow delete: if isAdmin() && isValidId(couponId);
+    }
+    
+    // Blogs Collection
+    match /blogs/{blogId} {
+      allow get: if isValidId(blogId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(blogId) && isValidBlog(incoming());
+      allow update: if isAdmin() && isValidId(blogId) && isValidBlog(incoming());
+      allow delete: if isAdmin() && isValidId(blogId);
+    }
+  }
+}

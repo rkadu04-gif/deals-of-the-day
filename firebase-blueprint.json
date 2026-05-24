@@ -1,0 +1,106 @@
+{
+  "entities": {
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin configuration",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      },
+      "required": ["email"]
+    },
+    "Deal": {
+      "title": "Deal",
+      "description": "An affiliate deal/product",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "store": { "type": "string" },
+        "originalPrice": { "type": "number" },
+        "discountedPrice": { "type": "number" },
+        "discountPercentage": { "type": "number" },
+        "affiliateLink": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "description": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "isTrending": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" },
+        "authorId": { "type": "string" }
+      },
+      "required": [
+        "title", "slug", "store", "originalPrice", "discountedPrice", 
+        "affiliateLink", "imageUrl", "categoryId", "authorId", 
+        "createdAt", "updatedAt"
+      ]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "icon": { "type": "string" }
+      },
+      "required": ["name", "slug"]
+    },
+    "Coupon": {
+      "title": "Coupon",
+      "description": "Store coupon",
+      "type": "object",
+      "properties": {
+        "store": { "type": "string" },
+        "code": { "type": "string" },
+        "description": { "type": "string" },
+        "expiryDate": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "authorId": { "type": "string" }
+      },
+      "required": ["store", "code", "description", "authorId", "createdAt"]
+    },
+    "Blog": {
+      "title": "Blog",
+      "description": "Blog article",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "content": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["title", "slug", "content", "authorId", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "List of administrators"
+    },
+    "/deals/{dealId}": {
+      "schema": { "$ref": "#/entities/Deal" },
+      "description": "Affiliate deals"
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Categories for deals"
+    },
+    "/coupons/{couponId}": {
+      "schema": { "$ref": "#/entities/Coupon" },
+      "description": "Coupon codes"
+    },
+    "/blogs/{blogId}": {
+      "schema": { "$ref": "#/entities/Blog" },
+      "description": "Blog articles"
+    }
+  }
+}

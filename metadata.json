@@ -1,0 +1,6 @@
+{
+  "name": "Deals of the Day",
+  "description": "Premium affiliate marketing website with trending deals, coupons, and product rankings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
