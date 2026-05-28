@@ -8,7 +8,7 @@ export default function BlogPage() {
     <div className="bg-bg-light dark:bg-bg-dark min-h-screen py-10">
       <Helmet>
         <title>Blog & Tech Guides | Deals of the Day</title>
-        <meta name="description" content="Read expert reviews, buying guides, and tricks to save money on smartphones, laptops, electronics, and fashion." />
+        <meta name="description" content="Read expert reviews, buying guides, and tricks to save money on smartphones, laptops, electronics, and powerbanks." />
       </Helmet>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
