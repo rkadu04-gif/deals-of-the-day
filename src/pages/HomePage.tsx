@@ -1,20 +1,63 @@
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { MessageCircle, ExternalLink, Zap, ShieldCheck, TrendingUp } from 'lucide-react';
-import { allDeals } from '../data/dealsData';
+import { collection, getDocs, limit, query } from 'firebase/firestore';
+import { db } from '../firebase';
+import { allDeals as fallbackDeals } from '../data/dealsData';
 
 const calculateDiscount = (original: number, discounted: number) => {
   if (!original || !discounted || original <= discounted) return 0;
   return Math.round(((original - discounted) / original) * 100);
 };
 
+const LinkifyText = ({ text }: { text: string }) => {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return (
+    <div className="whitespace-pre-wrap text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-300 font-medium">
+      {parts.map((part, i) => {
+        if (part.match(urlRegex)) {
+          return (
+            <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline font-bold break-all">
+              {part}
+            </a>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </div>
+  );
+};
+
 export default function HomePage() {
-  const topDeals = allDeals.slice(0, 8); // Taking the first 8 deals
+  const [topDeals, setTopDeals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTopDeals = async () => {
+      try {
+        const q = query(collection(db, 'deals'), limit(8));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          setTopDeals(fallbackDeals.slice(0, 8));
+        } else {
+          setTopDeals(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+      } catch (err) {
+        setTopDeals(fallbackDeals.slice(0, 8));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTopDeals();
+  }, []);
 
   return (
     <>
       <Helmet>
-        <title>Deals of the Day | Lowest Prices on Mobiles, Tech & Fashion</title>
+        <title>Deals of the Day | Lowest Prices on Mobiles, Tech & Powerbanks</title>
         <meta name="description" content="Find the best trending deals, coupons, and discounts from Amazon and Flipkart. Join our Telegram channel for instant loot deal alerts!" />
       </Helmet>
 
@@ -47,7 +90,7 @@ export default function HomePage() {
       <section className="py-12 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
-             {['Smartphones', 'Laptops', 'Earbuds', 'Smartwatches', 'Fashion', 'Home Appliances', 'Gaming', 'Cameras'].map(cat => (
+             {['Smartphones', 'Laptops', 'Earbuds', 'Smartwatches', 'Powerbanks', 'Home Appliances', 'Gaming', 'Cameras'].map(cat => (
                <Link to={`/deals?category=${cat.toLowerCase()}`} key={cat} className="whitespace-nowrap px-6 py-3 border border-gray-200 dark:border-slate-700 rounded-lg font-medium bg-white dark:bg-slate-800 hover:border-brand hover:text-brand dark:hover:border-brand transition-colors shadow-sm">
                  {cat}
                </Link>
@@ -72,7 +115,34 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {topDeals.map(deal => {
               const discountPercentage = calculateDiscount(deal.originalPrice, deal.discountedPrice);
-              
+              const isPowerboxCollection = (deal.categoryId === 'powerbanks' || deal.category === 'powerbanks') && deal.description;
+
+              if (isPowerboxCollection) {
+                return (
+                  <div key={deal.id} className="col-span-2 md:col-span-3 lg:col-span-4 bg-white dark:bg-slate-900 border border-brand/20 dark:border-brand/40 shadow-sm rounded-xl p-4 md:p-6 mb-2">
+                    <div className="flex items-center mb-4">
+                      {deal.imageUrl && (
+                        <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 flex-shrink-0 mr-4">
+                          <img src={deal.imageUrl} alt={deal.store} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                          {deal.title}
+                        </h3>
+                        <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand">
+                          {deal.store || 'Powerbanks Collection'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-4 md:p-5 border border-gray-100 dark:border-slate-700">
+                      <LinkifyText text={deal.description} />
+                    </div>
+                  </div>
+                );
+              }
+
               return (
               <div key={deal.id} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-3 flex flex-col shadow-sm hover:shadow-md transition-shadow group">
                 <Link to={`/product/${deal.id}`} className="block h-40 bg-white dark:bg-white rounded-lg mb-3 flex items-center justify-center relative p-2 overflow-hidden border border-gray-100 dark:border-gray-200">
@@ -136,7 +206,7 @@ export default function HomePage() {
           <div className="prose dark:prose-invert prose-orange max-w-none">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">India's Ultimate Deals Platform</h2>
             <p className="mb-4 text-sm leading-relaxed">
-              Welcome to <strong>Deals of the Day</strong>, your premier destination for the latest drops, mega sale discounts, and hand-picked product recommendations across tech, lifestyle, and fashion. Whether you are looking for the <em>best mobiles under 15000</em>, top-rated ANC earbuds, or exclusive Amazon Great Indian Festival sale picks, our dedicated team constantly tracks price drops to ensure you never overpay again.
+              Welcome to <strong>Deals of the Day</strong>, your premier destination for the latest drops, mega sale discounts, and hand-picked product recommendations across tech, lifestyle, and electronics. Whether you are looking for the <em>best mobiles under 15000</em>, top-rated ANC earbuds, or exclusive Amazon Great Indian Festival sale picks, our dedicated team constantly tracks price drops to ensure you never overpay again.
             </p>
             
             <div className="grid md:grid-cols-3 gap-6 my-8">
