@@ -1,17 +1,42 @@
 import { useSearchParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { ExternalLink, Tag, ShieldCheck, Zap } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { allDeals } from '../data/dealsData';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
+import { allDeals as fallbackDeals } from '../data/dealsData';
 
 const calculateDiscount = (original: number, discounted: number) => {
   if (!original || !discounted || original <= discounted) return 0;
   return Math.round(((original - discounted) / original) * 100);
 };
 
+const LinkifyText = ({ text }: { text: string }) => {
+  if (!text) return null;
+  // Basic regex to find URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  
+  return (
+    <div className="whitespace-pre-wrap text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-300 font-medium">
+      {parts.map((part, i) => {
+        if (part.match(urlRegex)) {
+          return (
+            <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline font-bold break-all">
+              {part}
+            </a>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </div>
+  );
+};
+
 const seoContentData: Record<string, { title: string; metaDescription: string; contentTitle: string; contentHtml: JSX.Element; }> = {
   all: {
     title: "All Deals & Discounts | Deals of the Day",
-    metaDescription: "Find the latest online deals, coupons, and offers across multiple categories like smartphones, laptops, fashion, and more. Save big today!",
+    metaDescription: "Find the latest online deals, coupons, and offers across multiple categories like smartphones, laptops, powerbanks, and more. Save big today!",
     contentTitle: "Why Shop With Deals of the Day?",
     contentHtml: (
       <>
@@ -54,15 +79,15 @@ const seoContentData: Record<string, { title: string; metaDescription: string; c
       </>
     )
   },
-  fashion: {
-    title: "Fashion & Clothing Sale | Latest Trends on Discount",
-    metaDescription: "Shop top clothing brands, sneakers, and accessories at up to 80% off. Verified Myntra and Amazon fashion deals.",
-    contentTitle: "Elevate Your Style. Not Your Budget.",
+  powerbanks: {
+    title: "Powerbank Deals & Offers | Best Portable Chargers",
+    metaDescription: "Score huge deals on powerbanks from MI, Ambrane, URBN, and more. Unbeatable prices updated daily.",
+    contentTitle: "Never Run Out of Battery Again.",
     contentHtml: (
       <>
-        <p className="mb-4">From everyday casual wear to premium branded sneakers, our team curates the best fashion discounts online.</p>
+        <p className="mb-4">Get the best verified discounts and lowest prices on powerbanks.</p>
         <h4 className="font-bold mb-2">Pro Shopping Tips</h4>
-        <p>Always pair fashion discounts with flat-rate bank coupons. During Myntra's End of Reason Sale or Amazon Wardrobe Refresh Sale, you can easily find men's and women's clothing at a 50-80% markdown.</p>
+        <p>Always check for safe fast charging and multiple output ports when shopping for a powerbank.</p>
       </>
     )
   }
@@ -73,11 +98,32 @@ export default function DealsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentCategory = searchParams.get('category') || 'all';
   const searchQuery = searchParams.get('search') || '';
+  const [allDeals, setAllDeals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        const snap = await getDocs(collection(db, 'deals'));
+        if (snap.empty) {
+          setAllDeals(fallbackDeals);
+        } else {
+          const dealsData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setAllDeals(dealsData);
+        }
+      } catch (err) {
+        setAllDeals(fallbackDeals);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDeals();
+  }, []);
 
   // Filter deals based on the selected category and search query
   let filteredDeals = currentCategory === 'all' 
     ? allDeals 
-    : allDeals.filter(deal => deal.category === currentCategory);
+    : allDeals.filter(deal => deal.categoryId === currentCategory || deal.category === currentCategory);
 
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
@@ -93,7 +139,7 @@ export default function DealsPage() {
     { id: 'laptops', name: 'Laptops' },
     { id: 'earbuds', name: 'Earbuds' },
     { id: 'smartwatches', name: 'Smartwatches' },
-    { id: 'fashion', name: 'Fashion' },
+    { id: 'powerbanks', name: 'Powerbanks' },
     { id: 'home appliances', name: 'Home Appliances' },
     { id: 'gaming', name: 'Gaming' },
     { id: 'cameras', name: 'Cameras' }
@@ -147,11 +193,42 @@ export default function DealsPage() {
         </div>
 
         {/* Deals Grid */}
-        {filteredDeals.length > 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
+          </div>
+        ) : filteredDeals.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredDeals.map(deal => {
               const discountPercentage = calculateDiscount(deal.originalPrice, deal.discountedPrice);
-              
+              const isPowerboxCollection = (deal.categoryId === 'powerbanks' || deal.category === 'powerbanks') && deal.description;
+
+              if (isPowerboxCollection) {
+                return (
+                  <div key={deal.id} className="col-span-2 md:col-span-3 lg:col-span-4 bg-white dark:bg-slate-900 border border-brand/20 dark:border-brand/40 shadow-sm rounded-xl p-4 md:p-6 mb-2">
+                    <div className="flex items-center mb-4">
+                      {deal.imageUrl && (
+                        <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 flex-shrink-0 mr-4">
+                          <img src={deal.imageUrl} alt={deal.store} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                          {deal.title}
+                        </h3>
+                        <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand">
+                          {deal.store || 'Powerbanks Collection'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-4 md:p-5 border border-gray-100 dark:border-slate-700">
+                      <LinkifyText text={deal.description} />
+                    </div>
+                  </div>
+                );
+              }
+
               return (
               <div key={deal.id} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-3 flex flex-col shadow-sm hover:shadow-md transition-shadow group">
                 <Link to={`/product/${deal.id}`} className="block h-40 md:h-48 bg-white dark:bg-white rounded-lg mb-3 flex items-center justify-center relative p-2 overflow-hidden border border-gray-100 dark:border-gray-200">
