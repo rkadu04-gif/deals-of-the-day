@@ -147,7 +147,7 @@ export function AboutUs() {
           <strong>Deals of the Day</strong> is an online platform that helps users discover the best deals, discounts, and trending products from popular e-commerce websites such as Amazon, Flipkart, and Myntra.
         </p>
         <p>
-          Our goal is to make online shopping easier by collecting the best offers available across different platforms and sharing them in one place. We regularly update our website with the latest deals on electronics, fashion, home appliances, gadgets, and many other categories.
+          Our goal is to make online shopping easier by collecting the best offers available across different platforms and sharing them in one place. We regularly update our website with the latest deals on electronics, powerbanks, home appliances, gadgets, and many other categories.
         </p>
         
         <h2 className="text-2xl font-bold font-heading text-slate-900 dark:text-white mt-8 mb-4">How Our Platform Works</h2>
