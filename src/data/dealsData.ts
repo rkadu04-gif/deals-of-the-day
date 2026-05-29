@@ -1043,9 +1043,76 @@ export const allDeals: Deal[] = [
     type: 'Smartwatch'
   }
 },
-  // --- FASHION ---
+  // --- powerbanks ---
   
+{
+  id: 'p1',
+  category: 'powerbanks',
+  title: 'Portronics 10000 mAh 12W Slim Power Bank',
+  store: 'Flipkart',
+  originalPrice: 1499,
+  discountedPrice: 679,
+  imageUrl: 'https://rukminim1.flixcart.com/image/1536/1536/xif0q/power-bank/b/m/v/luxcell-b12-10000-por-2252-portronics-original-imagy9hbkxahntzm.jpeg?q=90',
+  affiliateLink: 'https://fktr.in/Vk0k4pJ',
+  specs: {
+    capacity: '10000 mAh',
+    output: '12W Fast Charging',
+    battery: 'Lithium Polymer',
+    ports: 'Dual USB Output',
+    input: 'Micro USB & Type-C Input',
+    compatibility: 'Mobile, Tablet & Accessories',
+    design: 'Slim & Lightweight',
+    color: 'Dark Blue',
+    safety: 'Multi-layer Protection',
+    type: 'Power Bank'
+  }
+},
 
+{
+  id: 'p2',
+  category: 'powerbanks',
+  title: 'Portronics Luxcell B 10K 10000mAh 22.5W Fast Charging Power Bank',
+  store: 'Flipkart',
+  originalPrice: 2499,
+  discountedPrice: 999,
+  imageUrl: 'https://m.media-amazon.com/images/I/61PcUSX7dWL._SX679_.jpg',
+  affiliateLink: 'https://amzn.to/43AufDR',
+  specs: {
+    capacity: '10000 mAh',
+    output: '22.5W Fast Charging',
+    battery: 'Lithium Polymer',
+    ports: 'USB-A Output, Type-C PD Output',
+    input: 'Type-C Input',
+    features: 'Wake Up Button',
+    design: 'Ultra Slim',
+    color: 'Green',
+    compatibility: 'Mobile, Tablet & Accessories',
+    type: 'Power Bank'
+  }
+},
+
+{
+  id: 'p3',
+  category: 'powerbanks',
+  title: 'Ambrane Force 10K 10000mAh 22.5W Fast Charging Power Bank',
+  store: 'Flipkart',
+  originalPrice: 1999,
+  discountedPrice: 899,
+  imageUrl: 'https://m.media-amazon.com/images/I/71i+ZBcuMmL._SL1500_.jpg',
+  affiliateLink: 'https://amzn.to/49tZkws',
+  specs: {
+    capacity: '10000 mAh',
+    output: '22.5W Fast Charging',
+    battery: 'Lithium Polymer',
+    inputOutput: 'USB Type-C Input & Output',
+    chargingTech: 'PD & QC Fast Charging',
+    design: 'Rugged, Slim & Compact',
+    travelFriendly: 'Yes',
+    compatibility: 'iPhone, Samsung, OnePlus & All Android Devices',
+    color: 'Dark Green',
+    type: 'Power Bank'
+  }
+},
   // --- LAPTOPS (15 items) ---
   
 
