@@ -921,6 +921,7 @@ export const allDeals: Deal[] = [
     resistance: 'IP55 Water Resistance',
     color: 'Raven Black',
     type: 'True Wireless In-Ear Earbuds'
+  }
   },
 {
   id: 'e7',
