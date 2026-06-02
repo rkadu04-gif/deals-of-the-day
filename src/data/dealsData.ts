@@ -900,7 +900,7 @@ export const allDeals: Deal[] = [
   }
 },
   {
-  id: 'e7',
+  id: 'e6',
   category: 'earbuds',
   title: 'GOBOULT Earl TWS ',
   store: 'Amazon',
@@ -923,7 +923,7 @@ export const allDeals: Deal[] = [
     type: 'True Wireless In-Ear Earbuds'
   },
 {
-  id: 'e6',
+  id: 'e7',
   category: 'earbuds',
   title: 'realme Buds Air 8',
   store: 'Amazon',
