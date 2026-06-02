@@ -906,7 +906,7 @@ export const allDeals: Deal[] = [
   store: 'Amazon',
   originalPrice:6999,
   discountedPrice: 2299,
-  imageUrl: 'https://m.media-amazon.com/images/I/51LRQwB1VhL._SL1500_.jpg',
+  imageUrl: 'https://m.media-amazon.com/images/I/71ut+5l0kyL._SL1500_.jpg',
   affiliateLink: 'https://amzn.to/4dKP4Tc',
   specs: {
     driver: '12mm Titanium-Coated Dynamic Drivers',
