@@ -899,6 +899,29 @@ export const allDeals: Deal[] = [
     type: 'True Wireless In-Ear Earbuds'
   }
 },
+  {
+  id: 'e7',
+  category: 'earbuds',
+  title: 'GOBOULT Earl TWS ',
+  store: 'Amazon',
+  originalPrice:6999,
+  discountedPrice: 2299,
+  imageUrl: 'https://m.media-amazon.com/images/I/51LRQwB1VhL._SL1500_.jpg',
+  affiliateLink: 'https://amzn.to/4dKP4Tc',
+  specs: {
+    driver: '12mm Titanium-Coated Dynamic Drivers',
+    anc: 'Up to 55dB Real-Time ANC',
+    battery: 'Up to 54 Hours Playback',
+    connectivity: 'Bluetooth 5.4',
+    latency: '47ms Ultra Low Latency',
+    audio: 'Spatial Audio Support',
+    charging: 'Fast Charging Support',
+    controls: 'Touch Controls',
+    features: 'Dual Device Connectivity | Adaptive ANC',
+    resistance: 'IP55 Water Resistance',
+    color: 'Raven Black',
+    type: 'True Wireless In-Ear Earbuds'
+  },
 {
   id: 'e6',
   category: 'earbuds',
