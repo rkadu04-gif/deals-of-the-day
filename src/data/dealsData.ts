@@ -793,8 +793,8 @@ export const allDeals: Deal[] = [
   specs: {
     driver: '10.4mm + 6mm Dual Dynamic Drivers',
     anc: '49dB Active Noise Cancellation',
-    battery: 'Up to 44 Hours Playback',
-    charging: 'Fast Charging Support',
+    battery:'Up to 44 Hours Playback',
+    'Fast Charging Support',
     connectivity: 'Bluetooth 5.3',
     latency: '94ms Low Latency',
     controls: 'Sliding Volume Control',
