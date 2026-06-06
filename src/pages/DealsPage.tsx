@@ -1,10 +1,12 @@
 import { useSearchParams, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ExternalLink, Tag, ShieldCheck, Zap } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { allDeals as fallbackDeals } from '../data/dealsData';
+import { allDeals as regularFallbackDeals, hotDeals as hotFallbackDeals } from '../data/dealsData';
+
+const fallbackDeals = [...hotFallbackDeals, ...regularFallbackDeals];
 
 const calculateDiscount = (original: number, discounted: number) => {
   if (!original || !discounted || original <= discounted) return 0;
@@ -33,7 +35,7 @@ const LinkifyText = ({ text }: { text: string }) => {
   );
 };
 
-const seoContentData: Record<string, { title: string; metaDescription: string; contentTitle: string; contentHtml: JSX.Element; }> = {
+const seoContentData: Record<string, { title: string; metaDescription: string; contentTitle: string; contentHtml: React.ReactNode; }> = {
   all: {
     title: "All Deals & Discounts | Deals of the Day",
     metaDescription: "Find the latest online deals, coupons, and offers across multiple categories like smartphones, laptops, powerbanks, and more. Save big today!",
@@ -46,13 +48,25 @@ const seoContentData: Record<string, { title: string; metaDescription: string; c
       </>
     )
   },
+  'hot-deals': {
+    title: "Trending Deals & Hot Offers",
+    metaDescription: "Find the most red-hot deals and trending discounts across all categories. Limited time flash sales and loot offers.",
+    contentTitle: "Trending Hot Deals & Loot Offers",
+    contentHtml: (
+      <>
+        <p className="mb-4">Welcome to our specially curated Hot Deals section. These are hand-picked, limited-time offers with maximum discounts.</p>
+        <h4 className="font-bold mb-2">Why Shop Hot Deals?</h4>
+        <p className="mb-4">These deals are verified for the highest historic price drops. Grab them quickly before they go out of stock!</p>
+      </>
+    )
+  },
   smartphones: {
-    title: "Best Smartphone Deals Under 15000 & More",
+    title: "Best Smartphone Deals & Offers",
     metaDescription: "Grab massive discounts on smartphones from Apple, Samsung, OnePlus, and more. Find the best gaming phones and camera phones at the lowest prices.",
     contentTitle: "Smartphone Buying Guide & Offers",
     contentHtml: (
       <>
-        <p className="mb-4">Looking for the <strong>best smartphone under 15000</strong> or the latest flagship? You've come to the right place. We track massive price drops during the Big Billion Days and Great Indian Festival.</p>
+        <p className="mb-4">Looking for the best smartphone or the latest flagship? You've come to the right place. We track massive price drops during the Big Billion Days and Great Indian Festival.</p>
         <h4 className="font-bold mb-2">What to Look For in a Phone</h4>
         <ul className="list-disc pl-5 mb-4 space-y-1">
           <li><strong>Processor:</strong> Snapdragon or MediaTek depending on your gaming needs.</li>
@@ -122,7 +136,7 @@ export default function DealsPage() {
 
   // Filter deals based on the selected category and search query
   let filteredDeals = currentCategory === 'all' 
-    ? allDeals 
+    ? allDeals.filter(deal => deal.categoryId !== 'hot-deals' && deal.category !== 'hot-deals')
     : allDeals.filter(deal => deal.categoryId === currentCategory || deal.category === currentCategory);
 
   if (searchQuery) {
@@ -168,7 +182,7 @@ export default function DealsPage() {
         
         <div className="mb-8">
           <h1 className="text-3xl md:text-5xl font-heading font-black mb-4 dark:text-white capitalize">
-            {currentCategory === 'all' ? 'All Live Deals' : `${currentCategory} Deals`}
+            {currentCategory === 'all' ? 'All Live Deals' : currentCategory === 'hot-deals' ? 'Hot Deals' : `${currentCategory.replace(/-/g, ' ')} Deals`}
           </h1>
           <p className="text-gray-500 dark:text-gray-400">
             Handpicked and verified discounts updated daily.
@@ -249,8 +263,8 @@ export default function DealsPage() {
                   </div>
                   <div className="mt-auto">
                     <div className="flex items-baseline space-x-2 mb-3">
-                      <span className="text-lg md:text-xl font-black text-red-600">₹{deal.discountedPrice.toLocaleString('en-IN')}</span>
-                      <span className="text-xs text-gray-400 line-through">₹{deal.originalPrice.toLocaleString('en-IN')}</span>
+                      <span className="text-lg md:text-xl font-black text-red-600">₹{(deal.discountedPrice || 0).toLocaleString('en-IN')}</span>
+                      <span className="text-xs text-gray-400 line-through">₹{(deal.originalPrice || 0).toLocaleString('en-IN')}</span>
                     </div>
                     <a href={deal.affiliateLink} target="_blank" rel="noopener noreferrer nofollow" className="w-full bg-brand/10 text-brand-dark dark:text-brand py-2.5 rounded-md text-xs font-bold flex items-center justify-center hover:bg-brand hover:text-white transition-colors">
                       <span>Get Deal</span>
