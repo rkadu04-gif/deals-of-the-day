@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { MessageCircle, ExternalLink, Zap, ShieldCheck, TrendingUp } from 'lucide-react';
-import { collection, getDocs, limit, query } from 'firebase/firestore';
+import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
-import { allDeals as fallbackDeals } from '../data/dealsData';
+import { hotDeals as fallbackDeals } from '../data/dealsData';
 
 const calculateDiscount = (original: number, discounted: number) => {
   if (!original || !discounted || original <= discounted) return 0;
@@ -38,7 +38,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchTopDeals = async () => {
       try {
-        const q = query(collection(db, 'deals'), limit(8));
+        const q = query(collection(db, 'deals'), where('categoryId', '==', 'hot-deals'), limit(8));
         const snap = await getDocs(q);
         if (snap.empty) {
           setTopDeals(fallbackDeals.slice(0, 8));
@@ -109,7 +109,7 @@ export default function HomePage() {
                </h2>
                <p className="text-slate-500 mt-2">Grab them before they are gone!</p>
              </div>
-             <Link to="/deals" className="hidden sm:block text-brand font-semibold hover:underline">View All &rarr;</Link>
+             <Link to="/deals?category=hot-deals" className="hidden sm:block text-brand font-semibold hover:underline">View All &rarr;</Link>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -163,8 +163,8 @@ export default function HomePage() {
                   </div>
                   <div className="mt-auto">
                     <div className="flex items-baseline space-x-2 mb-3">
-                      <span className="text-lg font-black text-red-600">₹{deal.discountedPrice.toLocaleString('en-IN')}</span>
-                      <span className="text-[11px] text-gray-400 line-through">₹{deal.originalPrice.toLocaleString('en-IN')}</span>
+                      <span className="text-lg font-black text-red-600">₹{(deal.discountedPrice || 0).toLocaleString('en-IN')}</span>
+                      <span className="text-[11px] text-gray-400 line-through">₹{(deal.originalPrice || 0).toLocaleString('en-IN')}</span>
                     </div>
                     <a href={deal.affiliateLink} target="_blank" rel="noopener noreferrer nofollow" className="w-full bg-brand/10 text-brand-dark dark:text-brand py-2 rounded-md text-xs font-bold flex items-center justify-center hover:bg-brand hover:text-white transition-colors">
                       <span>Get Deal</span>
@@ -231,6 +231,13 @@ export default function HomePage() {
             <p className="mb-4 text-sm leading-relaxed">
               Looking to upgrade your gear? From flagship killer <strong>smartphones</strong> to budget-friendly student <strong>laptops</strong>, we categorize thousands of affiliate offers daily. During blockbuster sale events like the Flipkart Big Billion Days and Amazon Prime Day, our website and Telegram channel serve as your live hub for "Loot Deals" and flash sale links.
             </p>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              <Link to="/deals" className="px-4 py-2 border border-brand/30 bg-brand/5 text-brand rounded-full text-sm font-bold hover:bg-brand hover:text-white transition-colors">
+                View All Deals
+              </Link>
+            </div>
+
             <p className="text-xs italic">
               <strong>Disclaimer:</strong> Prices and availability are subject to change rapidly. As an Amazon Associate, Deals of the Day earns from qualifying purchases.
             </p>
