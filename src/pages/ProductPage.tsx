@@ -143,67 +143,17 @@ export default function ProductPage() {
           {/* Middle Column - Specs & Features */}
           <div className="lg:col-span-5 flex flex-col">
             {(product.specs || product.features) ? (
-              <div className="space-y-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">
-                {/* Standard specs with icons */}
-                {(product.specs?.processor || product.features?.processor) && (
-                  <div className="flex items-start">
-                    <Cpu size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
-                    <span>{product.specs?.processor || product.features?.processor}</span>
-                  </div>
-                )}
-                {(product.specs?.ramStorage || product.features?.ramStorage) && (
-                  <div className="flex items-start">
-                    <Medal size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
-                    <span>{product.specs?.ramStorage || product.features?.ramStorage}</span>
-                  </div>
-                )}
-                {(product.specs?.rearCamera || product.features?.rearCamera) && (
-                  <div className="flex items-start">
-                    <Camera size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
-                    <span>{product.specs?.rearCamera || product.features?.rearCamera}</span>
-                  </div>
-                )}
-                {(product.specs?.frontCamera || product.features?.frontCamera) && (
-                  <div className="flex items-start">
-                    <span className="w-[18px] h-[18px] border-2 border-gray-400 rounded-full mr-3 mt-0.5 flex shrink-0"></span>
-                    <span>{product.specs?.frontCamera || product.features?.frontCamera}</span>
-                  </div>
-                )}
-                {(product.specs?.battery || product.features?.battery) && (
-                  <div className="flex items-start">
-                    <Battery size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
-                    <span>{product.specs?.battery || product.features?.battery}</span>
-                  </div>
-                )}
-                {(product.specs?.display || product.features?.display) && (
-                  <div className="flex items-start">
-                    <Maximize size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
-                    <span>{product.specs?.display || product.features?.display}</span>
-                  </div>
-                )}
-                {(product.specs?.antutuScore || product.features?.antutuScore) && (
-                  <div className="flex items-start font-medium text-gray-900 dark:text-white mt-2 pt-2 border-t border-gray-100 dark:border-slate-700">
-                    <span className="mr-3 shrink-0 text-gray-500">AnTuTu Score</span>
-                    <span>{product.specs?.antutuScore || product.features?.antutuScore}</span>
-                  </div>
-                )}
-
-                {/* Additional unknown specs/features from Firestore */}
-                {Object.entries({...(product.specs || {}), ...(product.features || {})})
-                  .filter(([key, _]) => !['processor', 'ramStorage', 'rearCamera', 'frontCamera', 'battery', 'display', 'antutuScore', 'releaseDate', 'specScore'].includes(key))
-                  .map(([key, val]) => (
-                  <div key={key} className="flex items-start font-medium text-gray-900 dark:text-white mt-2 pt-2 border-t border-gray-100 dark:border-slate-700">
-                    <span className="mr-3 shrink-0 capitalize text-gray-500">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                    <span>{String(val)}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">
+                {Object.entries({...(product.specs || {}), ...(product.features || {})}).map(([key, val]) => (
+                  <div key={key} className="flex flex-col p-3 bg-gray-50 dark:bg-slate-800/50 rounded-lg border border-gray-100 dark:border-slate-700">
+                    <span className="uppercase text-[10px] font-black text-brand mb-1 tracking-wider">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{String(val)}</span>
                   </div>
                 ))}
               </div>
             ) : (
-               <div className="flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-slate-800 rounded-xl text-center">
-                 <div className="text-gray-400 mb-2">
-                    {/* fallback content when no features exist */}
-                 </div>
-                 <div className="text-gray-500 font-medium">Features & Specifications to be updated</div>
+               <div className="flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-slate-800 rounded-xl text-center h-full">
+                 <div className="text-gray-500 font-medium">Specs & Features not available.</div>
                </div>
             )}
 
