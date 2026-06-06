@@ -1,11 +1,48 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { allDeals } from '../data/dealsData';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { allDeals as regularFallbackDeals, hotDeals as hotFallbackDeals } from '../data/dealsData';
 import { ExternalLink, Star, Medal, Cpu, Battery, Camera, Maximize, Award, CheckCircle } from 'lucide-react';
+
+const fallbackDeals = [...hotFallbackDeals, ...regularFallbackDeals];
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
-  const product = allDeals.find(p => p.id === id);
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDeal = async () => {
+      if (!id) return;
+      try {
+        const docRef = doc(db, 'deals', id);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          setProduct({ id: snap.id, ...snap.data() });
+        } else {
+          // Fallback to static data
+          const staticDeal = fallbackDeals.find(p => p.id === id);
+          if (staticDeal) setProduct(staticDeal);
+        }
+      } catch (err) {
+        const staticDeal = fallbackDeals.find(p => p.id === id);
+        if (staticDeal) setProduct(staticDeal);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDeal();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -26,6 +63,30 @@ export default function ProductPage() {
       <Helmet>
         <title>{product.title} - Price & Specs | Deals of the Day</title>
         <meta name="description" content={`Get the best deal on ${product.title}. Check specs, features, and expert rating.`} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.title,
+            "image": product.imageUrl,
+            "description": `Get the best deal on ${product.title}. Check specs, features, and expert rating.`,
+            "brand": {
+              "@type": "Brand",
+              "name": product.title.split(' ')[0]
+            },
+            "offers": {
+              "@type": "Offer",
+              "url": product.affiliateLink,
+              "priceCurrency": "INR",
+              "price": product.discountedPrice,
+              "availability": "https://schema.org/InStock",
+              "seller": {
+                "@type": "Organization",
+                "name": product.store
+              }
+            }
+          })}
+        </script>
       </Helmet>
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,55 +140,71 @@ export default function ProductPage() {
             </div>
           </div>
 
-          {/* Middle Column - Specs */}
+          {/* Middle Column - Specs & Features */}
           <div className="lg:col-span-5 flex flex-col">
-            {product.specs ? (
+            {(product.specs || product.features) ? (
               <div className="space-y-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">
-                {product.specs.processor && (
+                {/* Standard specs with icons */}
+                {(product.specs?.processor || product.features?.processor) && (
                   <div className="flex items-start">
-                    <Cpu size={18} className="mr-3 mt-0.5 text-gray-400" />
-                    <span>{product.specs.processor}</span>
+                    <Cpu size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
+                    <span>{product.specs?.processor || product.features?.processor}</span>
                   </div>
                 )}
-                {product.specs.ramStorage && (
+                {(product.specs?.ramStorage || product.features?.ramStorage) && (
                   <div className="flex items-start">
-                    <Medal size={18} className="mr-3 mt-0.5 text-gray-400" />
-                    <span>{product.specs.ramStorage}</span>
+                    <Medal size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
+                    <span>{product.specs?.ramStorage || product.features?.ramStorage}</span>
                   </div>
                 )}
-                {product.specs.rearCamera && (
+                {(product.specs?.rearCamera || product.features?.rearCamera) && (
                   <div className="flex items-start">
-                    <Camera size={18} className="mr-3 mt-0.5 text-gray-400" />
-                    <span>{product.specs.rearCamera}</span>
+                    <Camera size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
+                    <span>{product.specs?.rearCamera || product.features?.rearCamera}</span>
                   </div>
                 )}
-                {product.specs.frontCamera && (
+                {(product.specs?.frontCamera || product.features?.frontCamera) && (
                   <div className="flex items-start">
                     <span className="w-[18px] h-[18px] border-2 border-gray-400 rounded-full mr-3 mt-0.5 flex shrink-0"></span>
-                    <span>{product.specs.frontCamera}</span>
+                    <span>{product.specs?.frontCamera || product.features?.frontCamera}</span>
                   </div>
                 )}
-                {product.specs.battery && (
+                {(product.specs?.battery || product.features?.battery) && (
                   <div className="flex items-start">
-                    <Battery size={18} className="mr-3 mt-0.5 text-gray-400" />
-                    <span>{product.specs.battery}</span>
+                    <Battery size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
+                    <span>{product.specs?.battery || product.features?.battery}</span>
                   </div>
                 )}
-                {product.specs.display && (
+                {(product.specs?.display || product.features?.display) && (
                   <div className="flex items-start">
-                    <Maximize size={18} className="mr-3 mt-0.5 text-gray-400" />
-                    <span>{product.specs.display}</span>
+                    <Maximize size={18} className="mr-3 mt-0.5 text-gray-400 shrink-0" />
+                    <span>{product.specs?.display || product.features?.display}</span>
                   </div>
                 )}
-                {product.specs.antutuScore && (
+                {(product.specs?.antutuScore || product.features?.antutuScore) && (
                   <div className="flex items-start font-medium text-gray-900 dark:text-white mt-2 pt-2 border-t border-gray-100 dark:border-slate-700">
-                    <span className="mr-3">AnTuTu Score</span>
-                    <span>{product.specs.antutuScore}</span>
+                    <span className="mr-3 shrink-0 text-gray-500">AnTuTu Score</span>
+                    <span>{product.specs?.antutuScore || product.features?.antutuScore}</span>
                   </div>
                 )}
+
+                {/* Additional unknown specs/features from Firestore */}
+                {Object.entries({...(product.specs || {}), ...(product.features || {})})
+                  .filter(([key, _]) => !['processor', 'ramStorage', 'rearCamera', 'frontCamera', 'battery', 'display', 'antutuScore', 'releaseDate', 'specScore'].includes(key))
+                  .map(([key, val]) => (
+                  <div key={key} className="flex items-start font-medium text-gray-900 dark:text-white mt-2 pt-2 border-t border-gray-100 dark:border-slate-700">
+                    <span className="mr-3 shrink-0 capitalize text-gray-500">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                    <span>{String(val)}</span>
+                  </div>
+                ))}
               </div>
             ) : (
-               <div className="flex items-center justify-center h-full text-gray-400 italic">No detailed specs available</div>
+               <div className="flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-slate-800 rounded-xl text-center">
+                 <div className="text-gray-400 mb-2">
+                    {/* fallback content when no features exist */}
+                 </div>
+                 <div className="text-gray-500 font-medium">Features & Specifications to be updated</div>
+               </div>
             )}
 
             {/* Awards */}
@@ -175,8 +252,8 @@ export default function ProductPage() {
                    className="h-6 object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all"
                  />
                  <div className="text-right">
-                   <div className="text-2xl font-black text-gray-900 dark:text-white">₹{product.discountedPrice.toLocaleString()}</div>
-                   <div className="text-sm text-gray-400 line-through">₹{product.originalPrice.toLocaleString()}</div>
+                    <div className="text-2xl font-black text-gray-900 dark:text-white">₹{(product.discountedPrice || 0).toLocaleString()}</div>
+                   <div className="text-sm text-gray-400 line-through">₹{(product.originalPrice || 0).toLocaleString()}</div>
                  </div>
                </div>
                
@@ -186,7 +263,7 @@ export default function ProductPage() {
                
                {discountPercentage > 0 && (
                   <div className="mt-3 text-center text-xs font-bold text-green-600 dark:text-green-400 flex items-center justify-center">
-                    <CheckCircle size={14} className="mr-1" /> You save ₹{(product.originalPrice - product.discountedPrice).toLocaleString()} ({discountPercentage}%)
+                    <CheckCircle size={14} className="mr-1" /> You save ₹{((product.originalPrice || 0) - (product.discountedPrice || 0)).toLocaleString()} ({discountPercentage}%)
                   </div>
                )}
             </div>
