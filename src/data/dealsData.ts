@@ -23,12 +23,15 @@ export interface Deal {
   releaseDate?: string;
   specScore?: number;
   specs?: ProductSpec;
+  features?: any;
   userRating?: number;
   ratingCount?: number;
   expertRating?: string;
   gallery?: string[];
   awards?: string[];
 }
+
+export const hotDeals: Deal[] = [];
 
 export const allDeals: Deal[] = [
   // --- SMARTPHONES ---
