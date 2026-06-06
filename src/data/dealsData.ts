@@ -908,19 +908,22 @@ export const allDeals: Deal[] = [
   discountedPrice: 2299,
   imageUrl: 'https://m.media-amazon.com/images/I/71ut+5l0kyL._SL1500_.jpg',
   affiliateLink: 'https://amzn.to/4dKP4Tc',
-  specs: {
-    driver: '12mm Titanium-Coated Dynamic Drivers',
-    anc: 'Up to 55dB Real-Time ANC',
-    battery: 'Up to 54 Hours Playback',
-    connectivity: 'Bluetooth 5.4',
-    latency: '47ms Ultra Low Latency',
-    audio: 'Spatial Audio Support',
-    charging: 'Fast Charging Support',
+specs: {
+    anc: '50dB Hybrid ANC',
+    drivers: '10mm + 6mm Dual Drivers',
+    audio: 'Spatial Audio',
+    battery: 'Up to 50 Hours Playtime',
+    fastCharging: '10 Min Charge = 120 Min Playback',
+    bluetooth: 'Bluetooth 5.4',
+    calling: '6 Mic ENC Calling',
+    gaming: '45ms Low Latency Gaming Mode',
+    connectivity: 'Dual Device Pairing',
+    appSupport: 'Boult Amp App Support',
+    resistance: 'IPX5 Water Resistance',
     controls: 'Touch Controls',
-    features: 'Dual Device Connectivity | Adaptive ANC',
-    resistance: 'IP55 Water Resistance',
-    color: 'Raven Black',
-    type: 'True Wireless In-Ear Earbuds'
+    voiceAssistant: 'Google Assistant & Siri Support',
+    color: 'Obsidian Black / Sapphire Blue / Ivory White',
+    type: 'TWS Earbuds'
   }
   },
 {
