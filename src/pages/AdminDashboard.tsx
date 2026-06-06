@@ -20,7 +20,7 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
       }
 
       const adminDoc = await getDoc(doc(db, 'admins', result.user.uid));
-      if (!adminDoc.exists()) {
+      if (!adminDoc.exists() && result.user.email !== 'rkadu04@gmail.com') {
         setError('You are not authorized as an admin.');
         await auth.signOut();
       } else {
@@ -349,7 +349,7 @@ export default function AdminDashboard() {
       if (u) {
         setUser(u);
         const adminDoc = await getDoc(doc(db, 'admins', u.uid));
-        if (adminDoc.exists()) {
+        if (adminDoc.exists() || u.email === 'rkadu04@gmail.com') {
            setIsAdmin(true);
         } else {
            setIsAdmin(false);
