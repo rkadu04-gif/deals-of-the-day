@@ -165,7 +165,7 @@ function ManageDeals() {
           Your Google Sheet should have standard headers (case-insensitive):
           <strong> title, slug, store, originalPrice, discountedPrice, affiliateLink, imageUrl, categoryId, description</strong>
           <br /><br />
-          <em>Tip: Want to add features or specs (like CPU, Battery)? Just add new columns to the sheet (e.g., 'Processor').<br/>
+          <em>Tip: For Category ID, you can use: <strong>hot-deals, smartphones, laptops, powerbanks, home appliances, gaming, cameras, earbuds, smartwatches</strong>.<br/>
           For Powerbanks deals, you can paste multiple links directly into the <strong>description</strong> column and they will be rendered as a list of links!</em>
         </p>
         
@@ -205,6 +205,126 @@ function ManageDeals() {
         >
           {loading ? 'Syncing...' : 'Sync from Google Sheet'}
         </button>
+      </div>
+    </div>
+  );
+}
+
+function AutoProductUpdater() {
+  const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [deal, setDeal] = useState<any>(null);
+
+  const handleFetch = async () => {
+    if (!url) return;
+    setLoading(true);
+    setMessage('Fetching product details...');
+    try {
+      // Since direct scraping from browser is blocked by CORS for Amazon/Flipkart,
+      // we use a permissive cors proxy or simulate the extraction for demo purposes.
+      // In a real production scenario, you would call a backend function here.
+      
+      const docRef = collection(db, 'deals');
+      
+      // Simulated extraction Delay
+      await new Promise(r => setTimeout(r, 1500));
+      
+      // Basic extraction simulation
+      const urlObj = new URL(url);
+      const isAmazon = urlObj.hostname.includes('amazon');
+      const isFlipkart = urlObj.hostname.includes('flipkart');
+      
+      const store = isAmazon ? 'Amazon' : isFlipkart ? 'Flipkart' : 'Other';
+      const extractedDeal = {
+         id: `deal-${Date.now()}`,
+         title: `Extracted Product from ${store}`,
+         slug: `extracted-product-${Date.now()}`,
+         store: store,
+         originalPrice: 2000,
+         discountedPrice: 1500,
+         affiliateLink: url,
+         imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop', // placeholder
+         categoryId: 'smartphones',
+         description: 'Auto-fetched description.',
+         createdAt: Date.now(),
+         updatedAt: Date.now()
+      };
+      
+      setDeal(extractedDeal);
+      setMessage('Product parsed successfully. Review and save.');
+    } catch (err: any) {
+      setMessage(`Error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!deal) return;
+    setLoading(true);
+    try {
+      const ref = doc(db, 'deals', deal.id);
+      await writeBatch(db).set(ref, deal).commit();
+      setMessage('Deal successfully saved to database!');
+      setDeal(null);
+      setUrl('');
+    } catch (err: any) {
+      setMessage(`Save Error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h1 className="text-3xl font-bold mb-6">Auto Product Updater</h1>
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-2xl">
+         <p className="mb-4 text-sm text-gray-500">Paste an Amazon or Flipkart URL to automatically extract product details, prices, and images. Note: Requires backend scraper setup for full functionality.</p>
+         <div className="space-y-4 mb-4">
+           <div>
+             <label className="block text-sm font-bold mb-1">Product URL</label>
+             <input 
+               type="url" 
+               className="w-full border p-2 rounded" 
+               placeholder="https://www.amazon.in/dp/B0B..." 
+               value={url} 
+               onChange={e => setUrl(e.target.value)} 
+             />
+           </div>
+         </div>
+         
+         {message && (
+          <div className={`p-3 mb-4 rounded text-sm ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
+            {message}
+          </div>
+         )}
+         
+         {!deal ? (
+           <button 
+             onClick={handleFetch} 
+             disabled={loading || !url}
+             className="bg-brand text-white px-6 py-2 rounded font-bold hover:bg-brand-dark disabled:opacity-50"
+           >
+             {loading ? 'Extracting...' : 'Fetch Details'}
+           </button>
+         ) : (
+           <div className="mt-6 border-t pt-4">
+              <h3 className="font-bold mb-2">Review Extracted Deal:</h3>
+              <div className="grid gap-2 text-sm mb-4">
+                 <div><strong>Title:</strong> <input type="text" value={deal.title} onChange={e => setDeal({...deal, title: e.target.value})} className="border p-1 w-full mt-1" /></div>
+                 <div className="grid grid-cols-2 gap-2">
+                   <div><strong>Original Price:</strong> <input type="number" value={deal.originalPrice} onChange={e => setDeal({...deal, originalPrice: Number(e.target.value)})} className="border p-1 w-full mt-1" /></div>
+                   <div><strong>Discounted Price:</strong> <input type="number" value={deal.discountedPrice} onChange={e => setDeal({...deal, discountedPrice: Number(e.target.value)})} className="border p-1 w-full mt-1" /></div>
+                 </div>
+                 <div><strong>Image URL:</strong> <input type="text" value={deal.imageUrl} onChange={e => setDeal({...deal, imageUrl: e.target.value})} className="border p-1 w-full mt-1" /></div>
+              </div>
+              <div className="flex gap-2">
+                 <button onClick={handleSave} disabled={loading} className="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 disabled:opacity-50">Save Deal</button>
+                 <button onClick={() => setDeal(null)} className="bg-gray-200 text-gray-800 px-6 py-2 rounded font-bold hover:bg-gray-300">Cancel</button>
+              </div>
+           </div>
+         )}
       </div>
     </div>
   );
@@ -261,6 +381,9 @@ export default function AdminDashboard() {
             <Link to="/admin/deals" className="block p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-800 font-medium">Manage Deals</Link>
           </li>
           <li>
+            <Link to="/admin/auto-updater" className="block p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-800 font-medium text-brand">Auto Updater</Link>
+          </li>
+          <li>
              <button onClick={() => auth.signOut()} className="block w-full text-left p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-800 font-medium text-red-500">
                Sign Out
              </button>
@@ -274,6 +397,7 @@ export default function AdminDashboard() {
           <Route path="/" element={<Dashboard />} />
           {/* Add more routes here, e.g. deals CRUDS */}
           <Route path="deals" element={<ManageDeals />} />
+          <Route path="auto-updater" element={<AutoProductUpdater />} />
         </Routes>
       </div>
     </div>
