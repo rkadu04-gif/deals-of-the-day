@@ -796,8 +796,8 @@ export const allDeals: Deal[] = [
   specs: {
     driver: '10.4mm + 6mm Dual Dynamic Drivers',
     anc: '49dB Active Noise Cancellation',
-    battery:'Up to 44 Hours Playback',
-    'Fast Charging Support',
+    battery: 'Up to 44 Hours Playback',
+    charging: 'Fast Charging Support',
     connectivity: 'Bluetooth 5.3',
     latency: '94ms Low Latency',
     controls: 'Sliding Volume Control',
@@ -1142,46 +1142,5 @@ specs: {
     color: 'Dark Green',
     type: 'Power Bank'
   }
-},
-  // --- LAPTOPS (15 items) ---
-  
-
-  // --- EARBUDS / AUDIO (15 items) ---
-
+}
 ];
-
-
-// Dynamically generate the remaining requested products
-// REMOVED: Auto-generated mock data has been removed so you can add your real affiliate links.
-
-/* 
- * ==========================================
- * HOW TO ADD YOUR REAL AFFILIATE LINKS:
- * ==========================================
- * Copy the object format below and paste it inside the `allDeals` array above.
- * Replace the values with your actual product details and your real Amazon/Flipkart affiliate links.
- * 
- * Example Layout:
- * {
- *   id: 'unique-id-123',                 // Give each product a unique ID
- *   category: 'smartphones',             // 'smartphones', 'laptops', 'earbuds', 'smartwatches', 'fashion', 'home appliances', 'gaming', 'cameras'
- *   title: 'Real Product Name',          // Exact product name
- *   store: 'Amazon',                     // 'Amazon', 'Flipkart', 'Croma', 'Myntra', etc.
- *   originalPrice: 50000,                // Original MRP (Number only, no commas)
- *   discountedPrice: 45000,              // Your deal price (Number only, no commas)
- *   imageUrl: 'https://...',             // High quality image URL
- *   affiliateLink: 'https://amzn.to/...',// YOUR REAL AFFILIATE LINK HERE
- *   releaseDate: '01 Jan, 2024',         // (Optional)
- *   specScore: 90,                       // (Optional) Editor score out of 100
- *   userRating: 4.5,                     // (Optional)
- *   ratingCount: 1200,                   // (Optional)
- *   expertRating: '8.5/10',              // (Optional)
- *   awards: ['Bestseller'],              // (Optional)
- *   specs: {                             // (Optional)
- *     processor: '...',
- *     ramStorage: '...',
- *     battery: '...'
- *   }
- * }
- */
-
