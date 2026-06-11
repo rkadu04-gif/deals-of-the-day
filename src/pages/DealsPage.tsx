@@ -20,7 +20,7 @@ const LinkifyText = ({ text }: { text: string }) => {
   const parts = text.split(urlRegex);
   
   return (
-    <div className="whitespace-pre-wrap text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-300 font-medium font-sans">
+    <div className="whitespace-pre-wrap text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-300 font-medium">
       {parts.map((part, i) => {
         if (part.match(urlRegex)) {
           return (
@@ -115,18 +115,50 @@ export default function DealsPage() {
   const [allDeals, setAllDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isValidDeal = (deal: any): boolean => {
+    if (!deal) {
+      console.log('Invalid Deal: completely null/undefined');
+      return false;
+    }
+    
+    const title = deal.title?.toString().trim();
+    const store = deal.store?.toString().trim();
+    const imageUrl = deal.imageUrl?.toString().trim();
+    const discountedPrice = typeof deal.discountedPrice === 'number' 
+      ? deal.discountedPrice 
+      : parseFloat(String(deal.discountedPrice || '0'));
+    const affiliateLink = deal.affiliateLink?.toString().trim();
+
+    // Required fields must be non-empty and not equals to placeholder word 'unknown' or '0'
+    const hasTitle = !!(title && title.toLowerCase() !== 'unknown');
+    const hasStore = !!(store && store.toLowerCase() !== 'unknown');
+    const hasImg = !!(imageUrl && imageUrl.toLowerCase() !== 'unknown');
+    const hasPrice = !isNaN(discountedPrice) && discountedPrice > 0;
+    const hasLink = !!(affiliateLink && affiliateLink.toLowerCase() !== 'unknown');
+
+    if (!hasTitle || !hasStore || !hasImg || !hasPrice || !hasLink) {
+      console.log('Invalid Deal:', { id: deal.id, ...deal });
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     const fetchDeals = async () => {
       try {
         const snap = await getDocs(collection(db, 'deals'));
         if (snap.empty) {
-          setAllDeals(fallbackDeals);
+          const validatedFallback = fallbackDeals.filter(isValidDeal);
+          setAllDeals(validatedFallback);
         } else {
-          const dealsData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const dealsData = snap.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(isValidDeal);
           setAllDeals(dealsData);
         }
       } catch (err) {
-        setAllDeals(fallbackDeals);
+        const validatedFallback = fallbackDeals.filter(isValidDeal);
+        setAllDeals(validatedFallback);
       } finally {
         setLoading(false);
       }
@@ -134,7 +166,7 @@ export default function DealsPage() {
     fetchDeals();
   }, []);
 
-  // Filter deals based on selected category and search query
+  // Filter deals based on the selected category and search query
   let filteredDeals = currentCategory === 'all' 
     ? allDeals.filter(deal => deal.categoryId !== 'hot-deals' && deal.category !== 'hot-deals')
     : allDeals.filter(deal => deal.categoryId === currentCategory || deal.category === currentCategory);
@@ -142,8 +174,8 @@ export default function DealsPage() {
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
     filteredDeals = filteredDeals.filter(deal => 
-      deal.title.toLowerCase().includes(query) || 
-      deal.store.toLowerCase().includes(query)
+      deal.title && deal.title.toLowerCase().includes(query) || 
+      deal.store && deal.store.toLowerCase().includes(query)
     );
   }
 
@@ -170,17 +202,18 @@ export default function DealsPage() {
   const seoData = seoContentData[currentCategory] || seoContentData['all'];
 
   return (
-    <div className="bg-bg-light dark:bg-bg-dark min-h-screen py-10 font-sans">
+    <div className="bg-bg-light dark:bg-bg-dark min-h-screen py-10">
       <Helmet>
         <title>{seoData.title}</title>
         <meta name="description" content={seoData.metaDescription} />
+        {/* Helps SEO by indicating this is a canonical category page */}
         <link rel="canonical" href={`https://dealsofday.example.com/deals${currentCategory !== 'all' ? `?category=${currentCategory}` : ''}`} />
       </Helmet>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-8">
-          <h1 className="text-3xl md:text-5xl font-heading font-black mb-4 dark:text-white capitalize tracking-tight text-gray-900">
+          <h1 className="text-3xl md:text-5xl font-heading font-black mb-4 dark:text-white capitalize">
             {currentCategory === 'all' ? 'All Live Deals' : currentCategory === 'hot-deals' ? 'Hot Deals' : `${currentCategory.replace(/-/g, ' ')} Deals`}
           </h1>
           <p className="text-gray-500 dark:text-gray-400">
@@ -213,7 +246,15 @@ export default function DealsPage() {
         ) : filteredDeals.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredDeals.map(deal => {
+              if (!deal || !deal.title) {
+                // Defensive check: Do not render card if deal or title is missing
+                return null;
+              }
+
               const discountPercentage = calculateDiscount(deal.originalPrice, deal.discountedPrice);
+              const dealImg = (deal.imageUrl && deal.imageUrl.toLowerCase() !== 'unknown')
+                ? deal.imageUrl.split(',')[0].trim() 
+                : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop';
 
               return (
               <div key={deal.id} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-3 flex flex-col shadow-sm hover:shadow-md transition-shadow group">
@@ -223,7 +264,15 @@ export default function DealsPage() {
                       {discountPercentage}% OFF
                     </span>
                   )}
-                  <img src={deal.imageUrl?.split(',')[0]?.trim()} alt={deal.title} loading="lazy" className="w-full h-full object-contain rounded-md mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+                  <img 
+                    src={dealImg} 
+                    alt={deal.title} 
+                    loading="lazy" 
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop';
+                    }}
+                    className="w-full h-full object-contain rounded-md mix-blend-multiply group-hover:scale-105 transition-transform duration-300" 
+                  />
                 </Link>
                 
                 <div className="flex flex-col flex-grow">
@@ -231,17 +280,35 @@ export default function DealsPage() {
                     {deal.title}
                   </Link>
                   <div className="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">
-                    {deal.store}
+                    {deal.store || 'UNKNOWN'}
                   </div>
                   <div className="mt-auto">
                     <div className="flex items-baseline space-x-2 mb-3">
-                      <span className="text-lg md:text-xl font-black text-red-600">₹{(deal.discountedPrice || 0).toLocaleString('en-IN')}</span>
-                      <span className="text-xs text-gray-400 line-through">₹{(deal.originalPrice || 0).toLocaleString('en-IN')}</span>
+                      <span className="text-lg md:text-xl font-black text-red-600">
+                        {deal.discountedPrice && deal.discountedPrice > 0 ? `₹${Number(deal.discountedPrice).toLocaleString('en-IN')}` : 'Price details unavailable'}
+                      </span>
+                      {deal.originalPrice && deal.originalPrice > Number(deal.discountedPrice) ? (
+                        <span className="text-xs text-gray-400 line-through">₹{Number(deal.originalPrice).toLocaleString('en-IN')}</span>
+                      ) : null}
                     </div>
-                    <a href={deal.affiliateLink} target="_blank" rel="noopener noreferrer nofollow" className="w-full bg-brand/10 text-brand-dark dark:text-brand py-2.5 rounded-md text-xs font-bold flex items-center justify-center hover:bg-brand hover:text-white transition-colors">
-                      <span>Get Deal</span>
-                      <ExternalLink size={14} className="ml-1.5" />
-                    </a>
+                    {deal.affiliateLink ? (
+                      <a 
+                        href={deal.affiliateLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer nofollow" 
+                        className="w-full bg-brand/10 text-brand-dark dark:text-brand py-2.5 rounded-md text-xs font-bold flex items-center justify-center hover:bg-brand hover:text-white transition-colors"
+                      >
+                        <span>Get Deal</span>
+                        <ExternalLink size={14} className="ml-1.5" />
+                      </a>
+                    ) : (
+                      <button 
+                        disabled 
+                        className="w-full bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 py-2.5 rounded-md text-xs font-bold flex items-center justify-center cursor-not-allowed"
+                      >
+                        <span>Deal Unavailable</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -256,7 +323,7 @@ export default function DealsPage() {
 
         {/* Dynamic SEO Content Section */}
         <div className="mt-16 bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 border border-gray-200 dark:border-slate-800 shadow-sm prose prose-sm md:prose-base dark:prose-invert max-w-none">
-          <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-900">{seoData.contentTitle}</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-4">{seoData.contentTitle}</h2>
           <div className="text-gray-600 dark:text-gray-300">
             {seoData.contentHtml}
           </div>
