@@ -223,7 +223,7 @@ export default function DealsPage() {
                     <div className="flex items-center mb-4">
                       {deal.imageUrl && (
                         <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 flex-shrink-0 mr-4">
-                          <img src={deal.imageUrl} alt={deal.store} className="w-full h-full object-cover" />
+                          <img src={deal.imageUrl?.split(',')[0]?.trim()} alt={deal.store} loading="lazy" className="w-full h-full object-cover" />
                         </div>
                       )}
                       <div>
@@ -251,7 +251,7 @@ export default function DealsPage() {
                       {discountPercentage}% OFF
                     </span>
                   )}
-                  <img src={deal.imageUrl} alt={deal.title} className="w-full h-full object-contain rounded-md mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+                  <img src={deal.imageUrl?.split(',')[0]?.trim()} alt={deal.title} loading="lazy" className="w-full h-full object-contain rounded-md mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
                 </Link>
                 
                 <div className="flex flex-col flex-grow">
