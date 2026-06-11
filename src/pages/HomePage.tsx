@@ -59,30 +59,92 @@ export default function HomePage() {
       <Helmet>
         <title>Deals of the Day | Lowest Prices on Mobiles, Tech & Powerbanks</title>
         <meta name="description" content="Find the best trending deals, coupons, and discounts from Amazon and Flipkart. Join our Telegram channel for instant loot deal alerts!" />
+        <link rel="preload" as="image" href="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "WebSite",
+                "@id": "https://dealsofday.in/#website",
+                "url": "https://dealsofday.in/",
+                "name": "Deals of the Day",
+                "description": "Find the best trending deals, coupons, and discounts from Amazon and Flipkart.",
+                "potentialAction": [{
+                  "@type": "SearchAction",
+                  "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": "https://dealsofday.in/deals?search={search_term_string}"
+                  },
+                  "query-input": "required name=search_term_string"
+                }]
+              },
+              {
+                "@type": "Organization",
+                "@id": "https://dealsofday.in/#organization",
+                "name": "Deals of the Day",
+                "url": "https://dealsofday.in/",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://dealsofday.in/logo.png"
+                },
+                "sameAs": [
+                  "https://twitter.com/dealsofday",
+                  "https://www.facebook.com/dealsofday"
+                ]
+              }
+            ]
+          })}
+        </script>
       </Helmet>
 
       {/* Hero Banner */}
-      <section className="relative overflow-hidden bg-black text-white py-16 lg:py-24 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent z-10"></div>
-        <div className="absolute inset-0 bg-brand-dark/20 mix-blend-multiply"></div>
-        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded w-max mb-6 uppercase tracking-wider inline-block">Amazon Prime Exclusive</span>
-          <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight mb-6 max-w-3xl leading-tight">
-            Never Miss a Price Drop <span className="text-brand">Again.</span>
-          </h1>
-          <p className="text-lg md:text-xl font-medium mb-10 max-w-2xl text-gray-300">
-            Get instant alerts for the best loot deals, price glitches, and massive discounts across Amazon & Flipkart.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <Link to="/join" className="bg-white text-black px-8 py-4 rounded-lg font-bold text-lg inline-flex items-center space-x-2 shadow-xl hover:bg-gray-100 transition-colors">
-              <MessageCircle className="text-blue-500" />
-              <span>Join Telegram Channel</span>
-            </Link>
-            <Link to="/deals" className="border border-white/30 text-white px-8 py-4 rounded-lg font-bold text-lg backdrop-blur-sm hover:bg-white/10 transition-colors">
-              Browse Top Deals
-            </Link>
+      <section className="relative overflow-hidden bg-slate-950 text-white py-16 lg:py-28">
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-dark/20 via-black to-black z-10"></div>
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-luminosity"></div>
+        <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+          <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 mb-8 mt-4">
+             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+             <span className="text-xs font-bold uppercase tracking-wider text-green-400">Live: Today's Best Deals</span>
+             <span className="text-xs text-gray-300 border-l border-gray-600 pl-2 opacity-80">{topDeals.length * 20}+ Drops Today</span>
           </div>
-          <p className="mt-6 text-sm text-gray-400">Over 50,000+ shoppers saving daily!</p>
+          
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-black tracking-tight mb-6 max-w-4xl leading-[1.1]">
+            India's Most Trusted <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-orange-400">Deal Tracker.</span>
+          </h1>
+          <p className="text-lg md:text-xl font-medium mb-10 max-w-2xl text-gray-400 mx-auto">
+            Find the absolute lowest prices on smartphones, laptops, and gadgets across Amazon and Flipkart.
+          </p>
+          
+          {/* Universal Search Bar */}
+          <div className="w-full max-w-2xl mx-auto relative mb-10 group">
+             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+             </div>
+             <form onSubmit={(e) => {
+               e.preventDefault();
+               const query = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
+               if (query) window.location.href = `/deals?search=${encodeURIComponent(query)}`;
+             }}>
+               <input 
+                 name="search"
+                 type="text" 
+                 placeholder="Search for iPhone 15, Sony Earbuds, Laptops..." 
+                 className="w-full bg-white/10 backdrop-blur-xl border-2 border-white/20 text-white placeholder-gray-400 rounded-2xl py-4 md:py-5 pl-12 pr-32 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all text-base md:text-lg shadow-2xl"
+               />
+               <button type="submit" className="absolute right-2 top-2 bottom-2 bg-brand text-white font-bold rounded-xl px-4 md:px-6 hover:bg-brand-dark transition-all flex items-center justify-center">
+                 Search
+               </button>
+             </form>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-gray-400 font-medium">
+             <span className="hidden md:inline mr-2 text-white">Trending:</span>
+             <Link to="/deals?category=smartphones" className="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/10 transition-colors">Smartphones</Link>
+             <Link to="/deals?category=laptops" className="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/10 transition-colors">Laptops</Link>
+             <Link to="/deals?category=earbuds" className="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/10 transition-colors">Earbuds</Link>
+             <Link to="/deals?category=smartwatches" className="hidden sm:block bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/10 transition-colors">Smartwatches</Link>
+          </div>
         </div>
       </section>
 
@@ -115,33 +177,6 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {topDeals.map(deal => {
               const discountPercentage = calculateDiscount(deal.originalPrice, deal.discountedPrice);
-              const isPowerboxCollection = (deal.categoryId === 'powerbanks' || deal.category === 'powerbanks') && deal.description;
-
-              if (isPowerboxCollection) {
-                return (
-                  <div key={deal.id} className="col-span-2 md:col-span-3 lg:col-span-4 bg-white dark:bg-slate-900 border border-brand/20 dark:border-brand/40 shadow-sm rounded-xl p-4 md:p-6 mb-2">
-                    <div className="flex items-center mb-4">
-                      {deal.imageUrl && (
-                        <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 flex-shrink-0 mr-4">
-                          <img src={deal.imageUrl} alt={deal.store} className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      <div>
-                        <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white leading-tight">
-                          {deal.title}
-                        </h3>
-                        <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand">
-                          {deal.store || 'Powerbanks Collection'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-4 md:p-5 border border-gray-100 dark:border-slate-700">
-                      <LinkifyText text={deal.description} />
-                    </div>
-                  </div>
-                );
-              }
 
               return (
               <div key={deal.id} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-3 flex flex-col shadow-sm hover:shadow-md transition-shadow group">
@@ -151,7 +186,7 @@ export default function HomePage() {
                       {discountPercentage}% OFF
                     </span>
                   )}
-                  <img src={deal.imageUrl} alt={deal.title} className="w-full h-full object-contain rounded-md mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+                  <img src={deal.imageUrl?.split(',')[0]?.trim()} alt={deal.title} loading="lazy" className="w-full h-full object-contain rounded-md mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
                 </Link>
                 
                 <div className="flex flex-col flex-grow">
