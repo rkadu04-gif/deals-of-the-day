@@ -20,7 +20,7 @@ const LinkifyText = ({ text }: { text: string }) => {
   const parts = text.split(urlRegex);
   
   return (
-    <div className="whitespace-pre-wrap text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-300 font-medium">
+    <div className="whitespace-pre-wrap text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-300 font-medium font-sans">
       {parts.map((part, i) => {
         if (part.match(urlRegex)) {
           return (
@@ -134,7 +134,7 @@ export default function DealsPage() {
     fetchDeals();
   }, []);
 
-  // Filter deals based on the selected category and search query
+  // Filter deals based on selected category and search query
   let filteredDeals = currentCategory === 'all' 
     ? allDeals.filter(deal => deal.categoryId !== 'hot-deals' && deal.category !== 'hot-deals')
     : allDeals.filter(deal => deal.categoryId === currentCategory || deal.category === currentCategory);
@@ -170,18 +170,17 @@ export default function DealsPage() {
   const seoData = seoContentData[currentCategory] || seoContentData['all'];
 
   return (
-    <div className="bg-bg-light dark:bg-bg-dark min-h-screen py-10">
+    <div className="bg-bg-light dark:bg-bg-dark min-h-screen py-10 font-sans">
       <Helmet>
         <title>{seoData.title}</title>
         <meta name="description" content={seoData.metaDescription} />
-        {/* Helps SEO by indicating this is a canonical category page */}
         <link rel="canonical" href={`https://dealsofday.example.com/deals${currentCategory !== 'all' ? `?category=${currentCategory}` : ''}`} />
       </Helmet>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-8">
-          <h1 className="text-3xl md:text-5xl font-heading font-black mb-4 dark:text-white capitalize">
+          <h1 className="text-3xl md:text-5xl font-heading font-black mb-4 dark:text-white capitalize tracking-tight text-gray-900">
             {currentCategory === 'all' ? 'All Live Deals' : currentCategory === 'hot-deals' ? 'Hot Deals' : `${currentCategory.replace(/-/g, ' ')} Deals`}
           </h1>
           <p className="text-gray-500 dark:text-gray-400">
@@ -215,33 +214,6 @@ export default function DealsPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredDeals.map(deal => {
               const discountPercentage = calculateDiscount(deal.originalPrice, deal.discountedPrice);
-              const isPowerboxCollection = (deal.categoryId === 'powerbanks' || deal.category === 'powerbanks') && deal.description;
-
-              if (isPowerboxCollection) {
-                return (
-                  <div key={deal.id} className="col-span-2 md:col-span-3 lg:col-span-4 bg-white dark:bg-slate-900 border border-brand/20 dark:border-brand/40 shadow-sm rounded-xl p-4 md:p-6 mb-2">
-                    <div className="flex items-center mb-4">
-                      {deal.imageUrl && (
-                        <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 flex-shrink-0 mr-4">
-                          <img src={deal.imageUrl?.split(',')[0]?.trim()} alt={deal.store} loading="lazy" className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      <div>
-                        <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white leading-tight">
-                          {deal.title}
-                        </h3>
-                        <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand">
-                          {deal.store || 'Powerbanks Collection'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-4 md:p-5 border border-gray-100 dark:border-slate-700">
-                      <LinkifyText text={deal.description} />
-                    </div>
-                  </div>
-                );
-              }
 
               return (
               <div key={deal.id} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-3 flex flex-col shadow-sm hover:shadow-md transition-shadow group">
@@ -284,7 +256,7 @@ export default function DealsPage() {
 
         {/* Dynamic SEO Content Section */}
         <div className="mt-16 bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 border border-gray-200 dark:border-slate-800 shadow-sm prose prose-sm md:prose-base dark:prose-invert max-w-none">
-          <h2 className="text-xl md:text-2xl font-bold mb-4">{seoData.contentTitle}</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-900">{seoData.contentTitle}</h2>
           <div className="text-gray-600 dark:text-gray-300">
             {seoData.contentHtml}
           </div>
